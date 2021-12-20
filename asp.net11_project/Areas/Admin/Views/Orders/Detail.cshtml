@@ -1,0 +1,100 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Share/_Layout.cshtml";
+}
+@* để sử dụng phân trang thì using dòng sau *@
+@using X.PagedList
+@* để sử dụng hàm IpageList thì using *@
+@using X.PagedList.Mvc.Core
+@using System.IO
+@using asp.net11_project.Models
+@using Microsoft.EntityFrameworkCore
+@functions{
+    MyDbContext db = new MyDbContext();
+    public CustomersRecord GetCustomer(int idCustomer)
+    {
+        CustomersRecord record = db.Customers.Where(c => c.ID == idCustomer).FirstOrDefault();
+        return record != null ? record : new CustomersRecord();
+    }
+    public OrdersRecord GetOrder(int idOrder)
+    {
+        OrdersRecord record = db.Orders.Where(o => o.ID == idOrder).FirstOrDefault();
+        return record != null ? record : new OrdersRecord();
+    }
+    public ProductsRecord GetProduct(int idProduct)
+    {
+        ProductsRecord record = db.Products.Where(p => p.ID == idProduct).FirstOrDefault();
+        return record != null ? record : new ProductsRecord();
+    }
+}
+<div class="col-md-12">
+    <input onclick="history.back()" type="button" value="Back" />
+    <div class="panel panel-primary">
+        <div class="panel-heading">Chi tiết</div>
+        <div class="panel-body">
+            @*thông tin khách hàng*@
+            @{
+                OrdersRecord order = GetOrder(ViewBag.orderID);
+                CustomersRecord customer = GetCustomer(order.CustomerID);
+            }
+            <table class="table table-bordered table-hover">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Phone</th>
+                    <th>Trạng thái</th>
+
+                </tr>
+                <tr>
+                    <td>@customer.Name</td>
+                    <td>@customer.Email</td>
+                    <td>@customer.Address</td>
+                    <td>@customer.Phone</td>
+                    <td>
+                        @if (@order.Status == 1)
+                        {
+
+
+                            <span class="label label-danger">đã giao hàng</span>
+                        }
+                        else
+                        {
+                            <span class="label label-danger">Chưa giao hàng</span>
+                        }
+                    </td>
+                </tr>
+
+            </table>
+            @* thông tin sảng phẩm *@
+            <table class="table table-bordered table-hover">
+                <tr>
+
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Number</th>
+                </tr>
+                @foreach (var item in Model)
+                {
+                   
+                     ProductsRecord record = GetProduct(item.ProductID);
+                   
+                    <tr>
+                        <td><img src="~/Upload/Products/@record.Photo" style="width:100px;"/></td>
+                        <td>@record.Name</td>
+                        <td>@string.Format("{0:#,#.}",record.Price -(record.Price * record.Discount/100))</td>
+                        <td>@item.Quantity</td>
+                    </tr>
+                }
+
+            </table>
+            <style type="text/css">
+                .pagination {
+                    padding: 0px;
+                    margin: 0px;
+                }
+            </style>
+
+        </div>
+    </div>
+</div>

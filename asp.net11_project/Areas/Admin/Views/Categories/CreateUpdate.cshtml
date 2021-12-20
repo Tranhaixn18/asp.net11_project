@@ -1,0 +1,54 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Share/_Layout.cshtml";
+}
+@using asp.net11_project.Models;
+@functions{ 
+    public MyDbContext db = new MyDbContext();
+    public List<CategoriesRecord> GetCategories()
+    {
+        List<CategoriesRecord> listRecord = db.Categories.Where(c => c.ParentID == 0).OrderByDescending(c=>c.ID).ToList();
+        return listRecord != null ? listRecord : new List<CategoriesRecord>();
+    }
+}
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">Add edit Categories</div>
+        <div class="panel-body">
+            <form method="post" action="">
+                <!-- rows -->
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-2">Name</div>
+                    <div class="col-md-10">
+                        <input type="text" value="@if (Model != null) {<text>@Model["Name"]</text>}" name="Name" class="form-control" required>
+                    </div>
+                </div>
+                <!-- end rows -->
+                <!-- rows -->
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-2">Thuộc danh mục</div>
+                    <div class="col-md-10">
+                       <select class="form-control"style="width:250px;" name="parentID">
+                           <option value="0"></option>
+                           @{  
+                               List<CategoriesRecord> listCategories = GetCategories();
+                           }
+                           @foreach(var item in listCategories)
+            {
+                <option @if (Model != null && Convert.ToInt32(Model["ParentID"]) == item.ID) {<text>selected</text>} value="@item.ID">@item.Name</option>
+            }
+                       </select>
+                    </div>
+                </div>
+                <!-- end rows -->
+               
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-10">
+                        <input type="submit" value="Process" class="btn btn-primary">
+                    </div>
+                </div>
+                <!-- end rows -->
+            </form>
+        </div>
+    </div>
+</div>

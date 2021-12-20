@@ -1,0 +1,199 @@
+﻿@{
+    Layout = "~/Views/Share/LayoutTrangChu.cshtml";
+}
+@using asp.net11_project.Models
+@using Microsoft.EntityFrameworkCore
+@functions{
+    public MyDbContext db = new MyDbContext();
+    public List<ProductsRecord> HotProduct()
+    {
+        List<ProductsRecord> listRcord = db.Products.Where(p => p.Hot == 1).OrderByDescending(p => p.ID).Take(6).ToList();
+        return listRcord;
+    }
+    //danh mục sản phẩm
+    public List<CategoriesRecord> Categories()
+    {
+        //điều kiện in:là trả về các bản ghi của bảng categories có ID bằng 1 trong các bản ghi của câu lệnh select con
+        List<CategoriesRecord> listRecord = db.Categories.FromSqlRaw("select * from Categories where ID in (select CategoryID from Products where Categories.ID=Products.CategoryID)").ToList();
+        return listRecord;
+    }
+    //liệt kê các sản phẩm thuộc danh mục
+    public List<ProductsRecord> ListProducts(int categoryID)
+    {
+        List<ProductsRecord> listRecord = db.Products.Where(p=>p.CategoryID==categoryID).ToList();
+        return listRecord;
+    }
+}
+<div class="special-collection">
+    <div class="tabs-container">
+        <div class="row" style="margin-top:10px;">
+            <div class="col-lg-10">
+                <h2>HOT PRODUCT</h2>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+    <div class="tabs-content row">
+        <div id="content-tabb1" class="content-tab content-tab-proindex" style="display:none">
+            <div class="clearfix">
+                @{
+                    List<ProductsRecord> listProduct = HotProduct();
+                }
+                @foreach (var item in listProduct)
+                {
+                    <!-- box product -->
+                    <div class="col-xs-6 col-md-2 col-sm-6 ">
+                        <div class="product-grid" id="product-1168979" style="height: 350px; overflow: hidden;">
+                            <div class="image"> <a href="#"><img src="Upload/Products/@item.Photo" title="@item.Name" alt="@item.Name" class="img-responsive"></a> </div>
+                            <div class="info">
+                                <h3 class="name"><a href="/Products/Detail/@item.ID">@item.Name </a></h3>
+                                <p class="price-box"> <span class="special-price"> <span class="price product-price" style="text-decoration:line-through;"> @item.Price</span> ₫ </span> </p>
+                                <p class="price-box"> <span class="special-price"> <span class="price product-price">@string.Format("{0}", item.Price - (item.Price * item.Discount / 100)) </span>₫ </span> </p>
+                                <p class="price-box"> <a href="/Products/Start/@item.ID?start=1"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@item.ID?start=2"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@item.ID?start=3"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@item.ID?start=4"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@item.ID?start=5"><img src="Frontend/images/star.jpg"></a> </p>
+                                <div class="action-btn">
+                                    <form>
+                                        <a href="/Cart/Buy/@item.ID" class="button">Add to Cart</a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end box product -->
+                }
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12 col-md-12"> <img src="Frontend/images/adv1.jpg" class="img-thumbnail"> </div>
+</div>
+
+<!-- category product -->
+@{
+    List<CategoriesRecord> listCategories = Categories();
+}
+@foreach (CategoriesRecord item in listCategories)
+{
+    <div class="special-collection">
+        <div class="tabs-container">
+            <div class="row" style="margin-top:10px;">
+                <div class="head-tabs head-tab1 col-lg-11">
+                    <h2>@item.Name</h2>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="tabs-content row">
+            <div id="content-taba4" class="content-tab content-tab-proindex">
+
+                @{
+                    List<ProductsRecord> listProducts = ListProducts(item.ID);
+                }
+                @foreach (ProductsRecord itemProduct in listProduct)
+                {
+                    <!-- box product -->
+                    <div class="col-xs-6 col-md-2 col-sm-6 ">
+                        <div class="product-grid" id="product-1168979" style="height: 350px; overflow: hidden;">
+                            <div class="image"> <a href="#"><img src="Upload/Products/@itemProduct.Photo" title="@itemProduct.Name" alt="@itemProduct.Name" class="img-responsive"></a> </div>
+                            <div class="info">
+                                <h3 class="name"><a href="/Products/Detail/@itemProduct.ID">@itemProduct.Name </a></h3>
+                                <p class="price-box"> <span class="special-price"> <span class="price product-price" style="text-decoration:line-through;"> @itemProduct.Price</span> ₫ </span> </p>
+                                <p class="price-box"> <span class="special-price"> <span class="price product-price">@string.Format("{0}", itemProduct.Price - (itemProduct.Price * itemProduct.Discount / 100)) </span>₫ </span> </p>
+                                <p class="price-box"> <a href="/Products/Start/@itemProduct.ID?start=1"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@itemProduct.ID?start=2"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@itemProduct.ID?start=3"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@itemProduct.ID?start=4"><img src="Frontend/images/star.jpg"></a> <a href="/Products/Start/@itemProduct.ID?start=5"><img src="Frontend/images/star.jpg"></a> </p>
+                                <div class="action-btn">
+                                    <form>
+                                        <a href="/Cart/Buy/@itemProduct.ID" class="button">Add to Cart</a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end box product -->
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- /category product -->
+<!-- adv -->
+<div class="widebanner"> <a href="#"><img src="Frontend/100/047/633/themes/517833/assets/widebanner221b.jpg?1481775169361" alt="#" class="img-responsive"></a> </div>
+<!-- end adv -->
+<!-- hot news -->
+<div class="home-blog">
+    <h2 class="title"> <span>Tin tức</span></h2>
+    <div class="row">
+        <div class="owl-home-blog owl-home-blog-bottompage">
+            <!-- new item -->
+            <div class="item">
+                <div class="article">
+                    <a href="#" class="image"> <img src="Frontend/images/chicago.jpg" alt="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" title="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" class="img-responsive"> </a>
+                    <div class="info">
+                        <h3><a class="text3line" href="#" style="font-weight: bold;">Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?</a></h3>
+                        <p class="desc"> Không ai có thể phủ nhận sức hút từ vẻ đẹp của những chiếc điện thoại của hãng Apple. Đặc biệt hơn, khi mà ở thời điểm hiện tại, giá iPhone 6s và iPhone 6s Plus đang giảm và dần dần trở nên vừa vặn với túi tiền của...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- /news item -->
+            <!-- new item -->
+            <div class="item">
+                <div class="article">
+                    <a href="#" class="image"> <img src="Frontend/images/chicago.jpg" alt="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" title="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" class="img-responsive"> </a>
+                    <div class="info">
+                        <h3><a class="text3line" href="#" style="font-weight: bold;">Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?</a></h3>
+                        <p class="desc"> Không ai có thể phủ nhận sức hút từ vẻ đẹp của những chiếc điện thoại của hãng Apple. Đặc biệt hơn, khi mà ở thời điểm hiện tại, giá iPhone 6s và iPhone 6s Plus đang giảm và dần dần trở nên vừa vặn với túi tiền của...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- /news item -->
+            <!-- new item -->
+            <div class="item">
+                <div class="article">
+                    <a href="#" class="image"> <img src="Frontend/images/chicago.jpg" alt="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" title="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" class="img-responsive"> </a>
+                    <div class="info">
+                        <h3><a class="text3line" href="#" style="font-weight: bold;">Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?</a></h3>
+                        <p class="desc"> Không ai có thể phủ nhận sức hút từ vẻ đẹp của những chiếc điện thoại của hãng Apple. Đặc biệt hơn, khi mà ở thời điểm hiện tại, giá iPhone 6s và iPhone 6s Plus đang giảm và dần dần trở nên vừa vặn với túi tiền của...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- /news item -->
+            <!-- new item -->
+            <div class="item">
+                <div class="article">
+                    <a href="#" class="image"> <img src="Frontend/images/chicago.jpg" alt="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" title="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" class="img-responsive"> </a>
+                    <div class="info">
+                        <h3><a class="text3line" href="#" style="font-weight: bold;">Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?</a></h3>
+                        <p class="desc"> Không ai có thể phủ nhận sức hút từ vẻ đẹp của những chiếc điện thoại của hãng Apple. Đặc biệt hơn, khi mà ở thời điểm hiện tại, giá iPhone 6s và iPhone 6s Plus đang giảm và dần dần trở nên vừa vặn với túi tiền của...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- /news item -->
+            <!-- new item -->
+            <div class="item">
+                <div class="article">
+                    <a href="#" class="image"> <img src="Frontend/images/chicago.jpg" alt="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" title="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" class="img-responsive"> </a>
+                    <div class="info">
+                        <h3><a class="text3line" href="#" style="font-weight: bold;">Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?</a></h3>
+                        <p class="desc"> Không ai có thể phủ nhận sức hút từ vẻ đẹp của những chiếc điện thoại của hãng Apple. Đặc biệt hơn, khi mà ở thời điểm hiện tại, giá iPhone 6s và iPhone 6s Plus đang giảm và dần dần trở nên vừa vặn với túi tiền của...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- /news item -->
+            <!-- new item -->
+            <div class="item">
+                <div class="article">
+                    <a href="#" class="image"> <img src="Frontend/images/chicago.jpg" alt="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" title="Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?" class="img-responsive"> </a>
+                    <div class="info">
+                        <h3><a class="text3line" href="#" style="font-weight: bold;">Mua iPhone 6s và iPhone 6s Plus chính hãng ở đâu?</a></h3>
+                        <p class="desc"> Không ai có thể phủ nhận sức hút từ vẻ đẹp của những chiếc điện thoại của hãng Apple. Đặc biệt hơn, khi mà ở thời điểm hiện tại, giá iPhone 6s và iPhone 6s Plus đang giảm và dần dần trở nên vừa vặn với túi tiền của...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- /news item -->
+
+        </div>
+    </div>
+</div>
+<!-- /hotnews -->

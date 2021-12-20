@@ -1,0 +1,72 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Share/_Layout.cshtml";
+}
+@* để sử dụng phân trang thì using dòng sau *@
+@using X.PagedList
+@* để sử dụng hàm IpageList thì using *@
+@using X.PagedList.Mvc.Core
+@using System.IO
+@using asp.net11_project.Models
+@functions{
+    MyDbContext db = new MyDbContext();
+    public CustomersRecord GetCustomer(int customerID)
+    {
+        CustomersRecord record = db.Customers.Where(c => c.ID == customerID).FirstOrDefault();
+        return record!= null ? record:new CustomersRecord();
+    }
+}
+<div class="col-md-12">
+  
+    <div class="panel panel-primary">
+        <div class="panel-heading">List Orders</div>
+        <div class="panel-body">
+            <table class="table table-bordered table-hover">
+                <tr>
+
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Date</th>
+                    <th>Price</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+                @foreach (var item in Model)
+                {
+            <tr>
+
+                <td>@GetCustomer(item.CustomerID).Name</td>
+                <td>@GetCustomer(item.CustomerID).Phone</td>
+                <td>@item.Create.ToString("dd/MM/yyyy")</td>
+                <td>@string.Format("{0:#,#.}",item.Price)</td>
+
+                <td>
+                    @if (item.Status == 1)
+                    {<text>Đã giao hàng</text>}
+                else
+                {
+                    <text>chưa giao hàng</text>
+                }
+                </td>
+
+                <td style="text-align:center;">
+
+                    <a href="/Admin/Orders/Detail/@item.ID">Chi tiết</a>&nbsp;
+                    @if (item.Status == 0)
+                    {
+                        <a href="/Admin/Orders/Delivery/@item.ID" class="label label-info">Giao hàng</a>
+                    }
+                </td>
+            </tr>
+                }
+
+            </table>
+            <style type="text/css">
+                .pagination {
+                    padding: 0px;
+                    margin: 0px;
+                }
+            </style>
+            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page = page }))
+        </div>
+    </div>
+</div>
